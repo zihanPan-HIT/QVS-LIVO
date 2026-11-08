@@ -1,0 +1,133 @@
+/**:
+  ros__parameters:
+    common:
+      # 新 rig fronthall1 (2026-07-08, Mid-360 架高 0.72m + roll180 倒装 + 4×D435): 本轮 LIO-only
+      img_topic: "/camera/camera/color/image_raw"
+      # bag 原生 /livox/lidar 是 PointCloud2, 经 tools/livox_pc2_to_custom_node.py
+      # 在线转成 CustomMsg 后从 /livox/lidar_custom 进 (lidar_type=1 AVIA 通路只订 CustomMsg)
+      lid_topic: "/livox/lidar_custom"
+      imu_topic: "/livox/imu"         # Mid-360 内置 IMU ~196Hz, 加速度单位 g (倒装静止 z≈-1.003)
+      img_en: 0                       # 本轮 LIO-only; VIO 待相机外参优化后再开
+      lidar_en: 1
+      ros_driver_bug_fix: false
+
+    extrin_calib:
+      # Mid-360 出厂 IMU<->LiDAR (与官方 hku-mars FAST_LIO/config/mid360.yaml 逐字一致)
+      # 倒装(roll180) *不进* 这里 —— IMU<->LiDAR 是雷达内部关系与安装姿态无关,
+      # 倾斜由开机静止>=2s 的重力初始化自动恢复 (gravity_align_en: true)
+      extrinsic_T: [-0.011, -0.02329, 0.04412]
+      extrinsic_R: [1.0, 0.0, 0.0,
+                    0.0, 1.0, 0.0,
+                    0.0, 0.0, 1.0]
+      # LiDAR -> 前向 D435 彩色光学系 (本轮 img_en=0, LIO 不消费, 仅顺手对齐新 rig)
+      # 2026-07-08 更新: 取自本 bag 目录 extrinsics_used.yaml
+      #   (calibration_id mid360_front_d435i_measured_fixed_20260708, 皮尺量测初值非优化标定,
+      #    transform=lidar_to_camera_color_optical, 即 FAST-LIVO2 约定 p_cam=Rcl*p_lidar+Pcl 直接填)
+      # ⚠️ 量测初值仅作 baseline; 开 VIO(img_en=1) 前须换正式棋盘格优化外参
+      Rcl: [0.0, 1.0, 0.0,
+            0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0]
+      Pcl: [0.0, -0.2624, -0.13]
+
+    time_offset:
+      imu_time_offset: 0.0
+      img_time_offset: 0.0
+      exposure_time_init: 0.0
+
+    preprocess:
+      point_filter_num: 1
+      filter_size_surf: 0.1
+      lidar_type: 1                   # 1=AVIA: 选 Livox CustomMsg 订阅 (填错=订阅 PointCloud2=收不到数据)
+      scan_line: 4                    # Mid-360 四线 (line 字段 0-3)
+      scan_rate: 10
+      blind: 0.3
+      feature_extract_enabled: false
+
+    vio:
+      max_iterations: 5
+      outlier_threshold: 1000
+      img_point_cov: 100
+      patch_size: 8
+      patch_pyrimid_level: 4
+      normal_en: true
+      raycast_en: false
+      inverse_composition_en: false
+      exposure_estimate_en: true
+      inv_expo_cov: 0.1
+      grid_size: 5
+      grid_n_height: 17
+
+    imu:
+      imu_en: true
+      imu_int_frame: 30
+      gravity_est_en: true            # 静止启动估重力, 恢复 45° 倾斜
+      ba_bg_est_en: true
+      acc_cov: 0.1                     # Mid-360 内置 IMU (官方 mid360.yaml 0.1/0.1)
+      gyr_cov: 0.1
+
+    lio:
+      max_iterations: 5
+      dept_err: 0.02
+      beam_err: 0.05
+      min_eigen_value: 0.0025
+      voxel_size: 0.5
+      max_layer: 2
+      max_points_num: 50
+      layer_init_num: [5, 5, 5, 5, 5]
+      data_retention_time: 0.0
+
+    local_map:
+      map_sliding_en: false
+      half_map_size: 100
+      sliding_thresh: 8.0
+
+    uav:
+      imu_rate_odom: false
+      gravity_align_en: true          # 2026-07-01: BEV 需 z=竖直的世界系; false 会留 45°歪帧致 M4 elevation 失效
+
+    publish:
+      dense_map_en: true
+      pub_effect_point_en: false
+      pub_plane_en: false
+      pub_scan_num: 1
+      blind_rgb_points: 0.0
+
+    evo:
+      seq_name: "fronthall1_20260708"
+      pose_output_en: false
+
+    pcd_save:
+      pcd_save_en: false
+      colmap_output_en: false
+      filter_size_pcd: 0.01
+      interval: -1
+
+    debug:
+      plot_time: -10.0
+      frame_cnt: 6
+
+    camera:
+      model: "Pinhole"
+      width: 640
+      height: 480
+      scale: 1.0
+      fx: 605.4541096693224
+      fy: 607.0726057195229
+      cx: 330.2128595328623
+      cy: 246.7226069133648
+      d0: 0.1581950204629965
+      d1: -0.31314626114596156
+      d2: 0.0009058382881218566
+      d3: -0.0013061458729652182
+
+    multi_camera:
+      enable: false
+      topics:
+        front: "/camera/camera/color/image_raw"
+      extrinsics:
+        front:
+          # 2026-07-08 同步 extrin_calib 的皮尺量测初值 (见上, mid360_front_d435i_measured_fixed_20260708)
+          R: [0.0, 1.0, 0.0,
+              0.0, 0.0, 1.0,
+              1.0, 0.0, 0.0]
+          T: [0.0, -0.2624, -0.13]

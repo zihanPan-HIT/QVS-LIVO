@@ -1,0 +1,329 @@
+# AIRY + four-camera calibration example; replace calibration for your sensor rig.
+/**:
+  ros__parameters:
+    common:
+      img_topic: /qvs/input/front/image
+      lid_topic: /rslidar_points
+      imu_topic: /rslidar_imu_data
+      img_en: 1
+      lidar_en: 1
+      ros_driver_bug_fix: false
+    extrin_calib:
+      extrinsic_T:
+      - 0.0
+      - 0.0
+      - 0.0
+      extrinsic_R:
+      - 0.0
+      - -1.0
+      - 0.0
+      - -1.0
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+      - -1.0
+      Rcl:
+      - -0.999993488142341
+      - -0.0031916438524545324
+      - 0.0016843641034486483
+      - 0.0017003358397726313
+      - -0.005008147203150214
+      - 0.9999860135620017
+      - -0.0031831636693519043
+      - 0.9999823657800725
+      - 0.0050135414572385585
+      Pcl:
+      - 0.023638716220863235
+      - -0.2717595440683662
+      - -0.16185822972119865
+    time_offset:
+      imu_time_offset: 0.0
+      img_time_offset: 0.0
+      exposure_time_init: 0.0
+    preprocess:
+      point_filter_num: 1
+      filter_size_surf: 0.1
+      lidar_type: 7
+      scan_line: 96
+      scan_rate: 10
+      blind: 0.3
+      feature_extract_enabled: false
+    vio:
+      camera_mode: four
+      camera_reorder_window_ms: 20.0
+      camera_sync_tolerance_ms: 35.0
+      joint_warmup_sec: 1.0
+      camera_queue_capacity: 768
+      min_tracked_points_per_camera: 4
+      min_joint_tracked_points: 12
+      min_joint_cameras: 1
+      max_residual_rmse: 20.0
+      max_rotation_increment_deg: 0.1
+      max_translation_increment_m: 0.01
+      adaptive:
+        enable: true
+        partial_batch:
+          enable: true
+          missing_camera_timeout_ms: 30.0
+        rotation_scale_rad: 0.017453292519943295
+        translation_scale_m: 0.1
+        weak_relative_eigenvalue: 0.05
+        weak_absolute_eigenvalue: 1.0e-09
+        health_off_threshold: 0.25
+        health_on_threshold: 0.45
+        hard_reject_health: 0.08
+        off_hysteresis_frames: 3
+        on_hysteresis_frames: 5
+        minimum_probation_duration_sec: 0.5
+        covariance_health_floor: 0.1
+        maximum_covariance_scale: 10.0
+        complement_score_gain: 2.0
+        selection_switch_margin: 0.1
+        selection_challenger_frames: 3
+        healthy_tracked_points: 24
+        healthy_tracking_ratio: 0.5
+        healthy_residual_rmse: 10.0
+        maximum_saturation_fraction: 0.25
+        maximum_dark_fraction: 0.35
+        healthy_mean_gradient: 12.0
+        healthy_spatial_coverage: 0.2
+        total_candidate_budget: 240
+        minimum_candidate_budget: 16
+        total_patch_budget: 120
+        minimum_patch_budget: 8
+        minimum_selected_cameras: 1
+        maximum_selected_cameras: 1
+        metrics:
+          enable: true
+        camera_threads: 4
+      multiview:
+        cross_camera_migration_shadow_enable: false
+        reference_only_migration_shadow:
+          enable: false
+        time_transfer:
+          shadow_enable: false
+        shared_landmarks:
+          shadow_enable: false
+          observation_shadow_enable: false
+          tombstone_shadow_enable: false
+          refit_shadow_enable: false
+          linearization_shadow:
+            enable: false
+            allow_relative_affine_experiment: false
+            maximum_source_age_ms: 500.0
+            maximum_candidate_evaluations_per_batch: 16384
+          plane_cell_size_m: 0.25
+          maximum_seeds_per_batch: 512
+          maximum_observations_per_batch: 512
+          maximum_patch_levels: 4
+          maximum_patch_values_per_observation: 1024
+      max_iterations: 5
+      outlier_threshold: 400
+      img_point_cov: 100
+      joint_img_point_cov: 1000
+      patch_size: 8
+      patch_pyrimid_level: 4
+      normal_en: true
+      raycast_en: false
+      inverse_composition_en: false
+      exposure_estimate_en: false
+      inv_expo_cov: 0.1
+      grid_size: 5
+      grid_n_height: 17
+      camera_supply_receipt_enable: true
+    imu:
+      imu_en: true
+      imu_int_frame: 30
+      gravity_est_en: true
+      ba_bg_est_en: true
+      acc_cov: 0.1
+      gyr_cov: 0.1
+    lio:
+      max_iterations: 5
+      dept_err: 0.02
+      beam_err: 0.05
+      min_eigen_value: 0.0025
+      voxel_size: 0.5
+      max_layer: 2
+      max_points_num: 50
+      layer_init_num:
+      - 5
+      - 5
+      - 5
+      - 5
+      - 5
+      data_retention_time: 0.0
+      plane_lifecycle:
+        shadow_enable: false
+        maximum_normal_change_rad: 0.35
+        maximum_center_shift_m: 0.5
+        maximum_planarity_change: 0.05
+    local_map:
+      map_sliding_en: true
+      half_map_size: 100
+      sliding_thresh: 8.0
+    uav:
+      imu_rate_odom: false
+      gravity_align_en: true
+    publish:
+      dense_map_en: false
+      pub_effect_point_en: false
+      pub_plane_en: false
+      pub_scan_num: 1
+      blind_rgb_points: 0.0
+      persistent_map_en: false
+    evo:
+      seq_name: airy_vio_ablation
+      pose_output_en: false
+    pcd_save:
+      pcd_save_en: false
+      colmap_output_en: false
+      filter_size_pcd: 0.1
+      interval: -1
+    debug:
+      plot_time: -10.0
+      frame_cnt: 6
+    camera:
+      model: Pinhole
+      width: 640
+      height: 480
+      scale: 1.0
+      fx: 603.1065673828125
+      fy: 603.1029052734375
+      cx: 330.1110534667969
+      cy: 246.59886169433594
+      d0: 0.0
+      d1: 0.0
+      d2: 0.0
+      d3: 0.0
+    multi_camera:
+      enable: false
+      topics:
+        front: /qvs/input/front/image
+        left: /qvs/input/left/image
+        back: /qvs/input/back/image
+        right: /qvs/input/right/image
+      time_offsets:
+        front: 0.0
+        left: 0.0
+        back: 0.0
+        right: 0.0
+      cameras:
+        front:
+          model: Pinhole
+          width: 640
+          height: 480
+          scale: 1.0
+          fx: 603.1065673828125
+          fy: 603.1029052734375
+          cx: 330.1110534667969
+          cy: 246.59886169433594
+          d0: 0.0
+          d1: 0.0
+          d2: 0.0
+          d3: 0.0
+        left:
+          model: Pinhole
+          width: 640
+          height: 480
+          scale: 1.0
+          fx: 604.419189453125
+          fy: 604.081298828125
+          cx: 327.65948486328125
+          cy: 250.95101928710938
+          d0: 0.0
+          d1: 0.0
+          d2: 0.0
+          d3: 0.0
+        back:
+          model: Pinhole
+          width: 640
+          height: 480
+          scale: 1.0
+          fx: 604.7899780273438
+          fy: 604.6616821289062
+          cx: 326.8157958984375
+          cy: 244.5738525390625
+          d0: 0.0
+          d1: 0.0
+          d2: 0.0
+          d3: 0.0
+        right:
+          model: Pinhole
+          width: 640
+          height: 480
+          scale: 1.0
+          fx: 607.151123046875
+          fy: 606.9754638671875
+          cx: 323.3354187011719
+          cy: 253.26547241210938
+          d0: 0.0
+          d1: 0.0
+          d2: 0.0
+          d3: 0.0
+      vio_extrinsics:
+        front:
+          R:
+          - -0.999993488142341
+          - -0.0031916438524545324
+          - 0.0016843641034486483
+          - 0.0017003358397726313
+          - -0.005008147203150214
+          - 0.9999860135620017
+          - -0.0031831636693519043
+          - 0.9999823657800725
+          - 0.0050135414572385585
+          T:
+          - 0.023638716220863235
+          - -0.2717595440683662
+          - -0.16185822972119865
+        left:
+          R:
+          - 0.011402097122951621
+          - 0.9998279589765651
+          - -0.0146302641792605
+          - 0.014511318976066556
+          - 0.014464221993487875
+          - 0.9997900819190487
+          - 0.9998296923990474
+          - -0.01161200804681417
+          - -0.014343899969920915
+          T:
+          - 0.0257376813178993
+          - -0.2744591363587721
+          - -0.15690723200309248
+        back:
+          R:
+          - 0.9997769766666371
+          - 0.0016205753677488634
+          - 0.021056368699190493
+          - -0.021048989597706597
+          - -0.004443169836950256
+          - 0.9997685723599817
+          - 0.0017137573440959807
+          - -0.9999888159260971
+          - -0.0044080674323445646
+          T:
+          - 0.018101941301579442
+          - -0.2736742277564501
+          - -0.15932627532306756
+        right:
+          R:
+          - -0.015445004958050595
+          - -0.9996940504216689
+          - 0.019319869910627285
+          - -0.030112931589163727
+          - 0.0197784730625766
+          - 0.9993508009475048
+          - -0.9994271675179499
+          - 0.014853200154535728
+          - -0.03040919716495591
+          T:
+          - 0.015833011976899757
+          - -0.27765219669322555
+          - -0.1525408097148524
+    use_sim_time: false
+    buffer:
+      imu_algorithm_capacity: 8192
+      imu_overflow_fatal: true

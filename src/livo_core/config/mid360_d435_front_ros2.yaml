@@ -1,0 +1,131 @@
+/**:
+  ros__parameters:
+    common:
+      # Gate3(VIO) 前确认 penglab realsense 前向 D435i 实际话题名 (单相机 VIO 用)
+      img_topic: "/camera/camera/color/image_raw"
+      lid_topic: "/livox/lidar"       # Mid-360 Livox CustomMsg (lidar_type=1 走 AVIA 通路)
+      imu_topic: "/livox/imu"         # Mid-360 内置 IMU 200Hz —— 不是 D435 的 IMU
+      img_en: 1                       # Gate2 = LIO-only; Gate3(VIO) 改 1
+      lidar_en: 1
+      ros_driver_bug_fix: false
+
+    extrin_calib:
+      # Mid-360 出厂 IMU<->LiDAR (与官方 hku-mars FAST_LIO/config/mid360.yaml 逐字一致)
+      # 45° 安装倾斜 *不进* 这里, 由开机静止>=2s 的重力初始化自动恢复
+      extrinsic_T: [-0.011, -0.02329, 0.04412]
+      extrinsic_R: [1.0, 0.0, 0.0,
+                    0.0, 1.0, 0.0,
+                    0.0, 0.0, 1.0]
+      # LiDAR -> 前向 D435i 彩色光学系
+      # 2026-07-01 更新: 取自 test_sensor-check-3 bag 自带 extrinsics_used.yaml
+      #   (calibration_id mid360_front_d435i_a0, 2026-06-30 重标, transform=lidar_to_camera_color_optical
+      #    已是 FAST-LIVO2 约定 p_cam=Rcl*p_lidar+Pcl, 直接填不取逆; 结构与旧 Koide 同构、行正交归一)
+      # ⚠️ 该标定残差 RMSE=0.147m 偏高(旧 Koide 5.46mm) + 优化器 z-delta 撞 0.2m 边界: 旋转可信/平移存疑
+      #    仅影响 VIO(img_en=1) RGB 染色; LIO-only 几何(天花板伪影测试) 不受此外参影响
+      Rcl: [ 0.0014847701187254703, -0.999902734222611,    -0.013867860391628128,
+            -0.06281994117978679,    0.013747220551459577, -0.9979301924069028,
+             0.9980237724863387,     0.0023528751043513374, -0.06279341948708192]
+      Pcl: [0.022183290533113586, -0.10943658334091781, 0.06923205458199999]
+
+    time_offset:
+      imu_time_offset: 0.0
+      img_time_offset: 0.0
+      exposure_time_init: 0.0
+
+    preprocess:
+      point_filter_num: 1
+      filter_size_surf: 0.1
+      lidar_type: 1                   # 1=AVIA: 选 Livox CustomMsg 订阅 (填错=订阅 PointCloud2=收不到数据)
+      scan_line: 4                    # Mid-360 四线 (line 字段 0-3)
+      scan_rate: 10
+      blind: 0.3
+      feature_extract_enabled: false
+
+    vio:
+      max_iterations: 5
+      outlier_threshold: 1000
+      img_point_cov: 100
+      patch_size: 8
+      patch_pyrimid_level: 4
+      normal_en: true
+      raycast_en: false
+      inverse_composition_en: false
+      exposure_estimate_en: true
+      inv_expo_cov: 0.1
+      grid_size: 5
+      grid_n_height: 17
+
+    imu:
+      imu_en: true
+      imu_int_frame: 30
+      gravity_est_en: true            # 静止启动估重力, 恢复 45° 倾斜
+      ba_bg_est_en: true
+      acc_cov: 0.1                     # Mid-360 内置 IMU (官方 mid360.yaml 0.1/0.1)
+      gyr_cov: 0.1
+
+    lio:
+      max_iterations: 5
+      dept_err: 0.02
+      beam_err: 0.05
+      min_eigen_value: 0.0025
+      voxel_size: 0.5
+      max_layer: 2
+      max_points_num: 50
+      layer_init_num: [5, 5, 5, 5, 5]
+      data_retention_time: 0.0
+
+    local_map:
+      map_sliding_en: false
+      half_map_size: 100
+      sliding_thresh: 8.0
+
+    uav:
+      imu_rate_odom: false
+      gravity_align_en: true          # 2026-07-01: BEV 需 z=竖直的世界系; false 会留 45°歪帧致 M4 elevation 失效
+
+    publish:
+      dense_map_en: true
+      pub_effect_point_en: false
+      pub_plane_en: false
+      pub_scan_num: 1
+      blind_rgb_points: 0.0
+
+    evo:
+      seq_name: "mid360_d435_recalib_20260630"
+      pose_output_en: false
+
+    pcd_save:
+      pcd_save_en: false
+      colmap_output_en: false
+      filter_size_pcd: 0.01
+      interval: -1
+
+    debug:
+      plot_time: -10.0
+      frame_cnt: 6
+
+    camera:
+      model: "Pinhole"
+      width: 640
+      height: 480
+      scale: 1.0
+      fx: 605.4541096693224
+      fy: 607.0726057195229
+      cx: 330.2128595328623
+      cy: 246.7226069133648
+      d0: 0.1581950204629965
+      d1: -0.31314626114596156
+      d2: 0.0009058382881218566
+      d3: -0.0013061458729652182
+
+    multi_camera:
+      enable: false
+      topics:
+        front: "/camera/camera/color/image_raw"
+      extrinsics:
+        front:
+          # 2026-07-01 同步 extrin_calib 的新标定值 (见上, mid360_front_d435i_a0)
+          R: [ 0.0014847701187254703, -0.999902734222611,    -0.013867860391628128,
+              -0.06281994117978679,    0.013747220551459577, -0.9979301924069028,
+               0.9980237724863387,     0.0023528751043513374, -0.06279341948708192]
+          T: [0.022183290533113586, -0.10943658334091781, 0.06923205458199999]

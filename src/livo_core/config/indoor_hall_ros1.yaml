@@ -1,0 +1,128 @@
+common:
+  img_topic: "/camera/color/image_raw"
+  lid_topic: "/livox/lidar"
+  imu_topic: "/imu_filtered"
+  img_en: 1
+  lidar_en: 1
+  ros_driver_bug_fix: false
+
+extrin_calib:
+  extrinsic_T: [-0.011, -0.02329, 0.04412]
+  extrinsic_R: [1.0, 0.0, 0.0,
+                0.0, 1.0, 0.0,
+                0.0, 0.0, 1.0]
+  Rcl: [-0.003245525400, -0.011591084264,  0.999927554041,
+        -0.999993893503,  0.001333502739, -0.003230282860,
+        -0.001295963651, -0.999931931951, -0.011595341400]
+  Pcl: [0.129992980359, -0.003335279064, -0.066717192986]
+
+time_offset:
+  imu_time_offset: 0.0
+  lidar_time_offset: 0.0
+  img_time_offset: 0.0
+  exposure_time_init: 0.0
+
+preprocess:
+  point_filter_num: 1
+  filter_size_surf: 0.1
+  lidar_type: 2
+  scan_line: 4
+  blind: 0.3
+
+vio:
+  max_iterations: 5
+  outlier_threshold: 1000
+  img_point_cov: 100
+  patch_size: 8
+  patch_pyrimid_level: 4
+  normal_en: true
+  raycast_en: false
+  inverse_composition_en: false
+  exposure_estimate_en: true
+  inv_expo_cov: 0.1
+
+imu:
+  imu_en: true
+  imu_int_frame: 30
+  acc_cov: 0.5
+  gyr_cov: 0.3
+  b_acc_cov: 0.0001
+  b_gyr_cov: 0.0001
+
+lio:
+  max_iterations: 5
+  dept_err: 0.02
+  beam_err: 0.05
+  min_eigen_value: 0.0025
+  voxel_size: 0.5
+  max_layer: 2
+  max_points_num: 50
+  layer_init_num: [5, 5, 5, 5, 5]
+  data_retention_time: 0.0
+  max_runtime: 0.0
+
+local_map:
+  map_sliding_en: false
+  half_map_size: 100
+  sliding_thresh: 8.0
+
+uav:
+  imu_rate_odom: false
+  gravity_align_en: false
+
+publish:
+  dense_map_en: true
+  pub_effect_point_en: false
+  pub_plane_en: false
+  pub_scan_num: 1
+  blind_rgb_points: 0.0
+
+evo:
+  seq_name: "indoor_hall_20260609_ros1"
+  pose_output_en: false
+
+pcd_save:
+  pcd_save_en: true
+  type: 0
+  colmap_output_en: false
+  filter_size_pcd: 0.01
+  interval: -1
+
+image_save:
+  img_save_en: false
+  interval: 1
+
+multi_camera:
+  enable: true
+  topics:
+    front: "/camera/color/image_raw"
+    left:  "/camera_left/color/image_raw"
+    back:  "/camera_back/color/image_raw"
+    right: "/camera_right/color/image_raw"
+  # 真实采集外参, 来源:
+  #
+  # 采集包约定: p_lidar = T_lidar_camera * p_camera_optical
+  # livo_core 约定: 这里配置 base_link -> camera_link, 代码内部再乘
+  # camera_link -> camera_optical. 当前 base_link 与 livox_frame 同原点,
+  # 因此此处 R = R_lidar_optical * inv(R_camera_link_optical), T 保持原值。
+  extrinsics:
+    front:
+      R: [[0.999927554041, 0.003245525400, 0.011591084264],
+          [-0.003230282860, 0.999993893503, -0.001333502739],
+          [-0.011595341400, 0.001295963651, 0.999931931951]]
+      T: [0.129992980359, -0.003335279064, -0.066717192986]
+    left:
+      R: [[-0.009252111074, -0.999956452827, -0.001221020213],
+          [0.999856317675, -0.009268515154, 0.014192907844],
+          [-0.014203606827, -0.001089530414, 0.999898530090]]
+      T: [-0.000315608101, 0.127610398079, -0.072551990265]
+    back:
+      R: [[-0.999946776940, -0.003446978851, -0.009724280105],
+          [0.003423868078, -0.999991277089, 0.002392252597],
+          [-0.009732441325, 0.002358830622, 0.999949856495]]
+      T: [-0.130508942291, 0.003132380702, -0.066792519048]
+    right:
+      R: [[0.000089616285, 0.999974196960, -0.007183131792],
+          [-0.999998599453, 0.000101618625, 0.001670558619],
+          [0.001671245454, 0.007182972023, 0.999972805556]]
+      T: [-0.001122602767, -0.120758800333, -0.039248177612]

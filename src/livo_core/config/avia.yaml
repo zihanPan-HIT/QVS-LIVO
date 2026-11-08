@@ -1,0 +1,134 @@
+common:
+  img_topic: "/camera/color/image_raw"
+  lid_topic: "/livox/lidar"           # Gazebo gpu_ray 是瞬时点云, time 填充反而引入错位 (V3 实验)
+  imu_topic: "/imu_filtered"          # imu_spike_filter.py 滤波后的 IMU
+  img_en: 1                            # 开 VIO: 用 D435i RGB + Mid-360 LIO 组成完整 LIVO
+  lidar_en: 1
+  ros_driver_bug_fix: false
+
+extrin_calib:
+  # mid360_link 装在 base_link 上方 0.32m (mini.xacro mid360_joint)
+  # IMU=base_link, LiDAR=mid360_link, 两者同向 (X前/Y左/Z上, R=I)
+  # extrinsic_T/R: LiDAR->IMU, p_imu = R * p_lidar + T
+  # mid360 在 IMU(base_link) 系下位置: [0, 0, 0.32]
+  extrinsic_T: [0.0, 0.0, 0.32]
+  extrinsic_R: [1, 0, 0,
+                0, 1, 0,
+                0, 0, 1]
+  # Rcl/Pcl: LiDAR -> Camera optical, point_camera = Rcl * point_lidar + Pcl
+  # mid360 (X前/Y左/Z上) -> camera optical (X右/Y下/Z前)
+  #   LiDAR X(前) -> Camera Z(光轴前)  -> Rcl 列1 = (0,0,1)
+  #   LiDAR Y(左) -> Camera -X(右反向) -> Rcl 列2 = (-1,0,0)
+  #   LiDAR Z(上) -> Camera -Y(下反向) -> Rcl 列3 = (0,-1,0)
+  # Pcl: LiDAR 原点在 camera optical 系下坐标
+  #   LiDAR 在 camera_link 系: (0-0.2, 0-0, 0.32-0.16) = (-0.2, 0, 0.16)
+  #   转 optical: Rcl * (-0.2, 0, 0.16) = (0, -0.16, -0.2)
+  Rcl: [0, -1, 0,
+        0, 0, -1,
+        1, 0, 0]
+  Pcl: [0.0, -0.16, -0.2]
+
+time_offset:
+  imu_time_offset: 0.0
+  img_time_offset: 0.0 # 仿真中图像/IMU 共用 sim 时钟, 无传输延迟 (原 0.1 为 Avia 数据集值)
+  exposure_time_init: 0.0
+
+preprocess:
+  point_filter_num: 2     # 1->2 隔点下采样, 减少 plane 拟合噪声
+  # filter_size_surf (2026-05-21 E 方案实测): 0.05 实测 LIO 仍稳但染色点 2x 大部分增量在远距 +
+  # vegetation patch (不在 BEV 内), 对 BEV 水泥地 road 识别无效 (12 个 road 点落 BEV 不变),
+  # 回退 0.1 保 LIO 性能. BEV 内 road 稀疏是 livo_core 4 相机近距盲扇区的物理瓶颈,
+  # 需多帧累积 (MVP-2.5) 或 ground-surface IPM (MVP-3) 解决, 不在 filter_size_surf 范围.
+  filter_size_surf: 0.1
+  lidar_type: 2  # 2=Velodyne, 贴近真实 Mid-360 扫描型 LiDAR 处理逻辑 (fallback 走 yaw 推时间)
+  scan_line: 128
+  blind: 0.5
+
+vio:
+  max_iterations: 5
+  outlier_threshold: 1000 # 78 100 156 #100 200 500 700 infinite
+  img_point_cov: 100 # 100 1000 
+  patch_size: 8
+  patch_pyrimid_level: 4
+  normal_en: true
+  raycast_en: false
+  inverse_composition_en: false
+  exposure_estimate_en: true
+  inv_expo_cov: 0.1
+
+imu:
+  imu_en: true
+  imu_int_frame: 30
+  acc_cov: 0.2       # 0.5->0.2  更信任滤波后的 IMU (运行时 |a| std=1.29 已较稳)
+  gyr_cov: 0.1       # 0.3->0.1
+  b_acc_cov: 0.0001 # 0.1
+  b_gyr_cov: 0.0001 # 0.1
+
+lio:
+  max_iterations: 5
+  dept_err: 0.05     # 0.02->0.05  加大点到平面残差容忍, 不抠每点偏差
+  beam_err: 0.1      # 0.05->0.1
+  min_eigen_value: 0.0025 # 0.005
+  voxel_size: 0.5
+  max_layer: 2
+  max_points_num: 50
+  layer_init_num: [5, 5, 5, 5, 5]
+  data_retention_time: 120.0 # 数据保留时间(秒), 0=禁用
+  max_runtime: 0.0 # 最大运行时间(秒), 0=无限制, 超时自动shutdown
+
+local_map:  
+  map_sliding_en: false
+  half_map_size: 100
+  sliding_thresh: 8
+
+uav:
+  imu_rate_odom: false
+  gravity_align_en: false
+
+publish:
+  dense_map_en: true
+  pub_effect_point_en: false 
+  pub_plane_en: false
+  pub_scan_num: 1
+  blind_rgb_points: 0.0
+
+evo:
+  seq_name: "CBD_Building_01"
+  pose_output_en: false
+
+pcd_save:
+  pcd_save_en: true        # 开启 PCD 保存, 程序退出时写 ~/scout_ws/src/livo_core/PCD/scans.pcd
+  type: 0                  # 0=World Frame, 1=Body Frame
+  colmap_output_en: false
+  filter_size_pcd: 0.15
+  interval: -1             # -1 = 所有帧汇入一个 PCD
+
+image_save:
+  img_save_en: false
+  interval: 1
+
+# Stage A+B 多相机 BEV 融合: 4×RealSense D435i 4×90° 对称布局
+# enable=true 时除 common/img_topic 主相机外, 额外订阅 left/back/right 三路
+# 外参 R/T: base_link -> camera_*_link (相机相对车体的位姿)
+# URDF (scout_description/urdf/mini.xacro): front=朝+x, left=朝+y(yaw=90°),
+# back=朝-x(yaw=180°), right=朝-y(yaw=-90°), 各装在 base_link 上方 0.16m
+multi_camera:
+  enable: true
+  topics:
+    front: "/camera/color/image_raw"
+    left:  "/camera_left/color/image_raw"
+    back:  "/camera_back/color/image_raw"
+    right: "/camera_right/color/image_raw"
+  extrinsics:
+    front:
+      R: [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+      T: [0.2, 0.0, 0.16]
+    left:
+      R: [[0.0, -1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, 1.0]]
+      T: [0.0, 0.2, 0.16]
+    back:
+      R: [[-1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0]]
+      T: [-0.2, 0.0, 0.16]
+    right:
+      R: [[0.0, 1.0, 0.0], [-1.0, 0.0, 0.0], [0.0, 0.0, 1.0]]
+      T: [0.0, -0.2, 0.16]

@@ -1,0 +1,22 @@
+/**:
+  ros__parameters:
+    local_fast.enable: true
+    local_fast.body_dense: true
+    common.img_en: 0
+    multi_camera.enable: false
+    vio.camera_mode: front
+    vio.adaptive.enable: false
+    vio.adaptive.metrics.enable: false
+    uav.gravity_align_en: true
+    uav.imu_rate_odom: false
+    local_map.map_sliding_en: true
+    # 0.5m 体素的 20 格半径，私有配准工作集约 20m 立方。
+    local_map.half_map_size: 20
+    local_map.sliding_thresh: 1.0
+    publish.dense_map_en: false
+    publish.persistent_map_en: false
+    publish.pub_plane_en: false
+    evo.pose_output_en: false
+    pcd_save.pcd_save_en: false
+    pcd_save.colmap_output_en: false
+    pcd_save.interval: -1

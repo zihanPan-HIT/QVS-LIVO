@@ -1,0 +1,13 @@
+cam_model: Pinhole
+cam_width: 640
+cam_height: 480
+scale: 0.5
+# D435i 风格 RGB 相机内参: 640x480, 水平 FOV 69° → fx = 320/tan(34.5°) ≈ 465
+cam_fx: 465.0
+cam_fy: 465.0
+cam_cx: 320.0
+cam_cy: 240.0
+cam_d0: 0.0
+cam_d1: 0.0
+cam_d2: 0.0
+cam_d3: 0.0

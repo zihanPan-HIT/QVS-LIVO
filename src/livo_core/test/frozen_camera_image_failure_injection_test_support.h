@@ -1,0 +1,11 @@
+#ifndef LIVO_TEST_FROZEN_CAMERA_IMAGE_FAILURE_INJECTION_TEST_SUPPORT_H_
+#define LIVO_TEST_FROZEN_CAMERA_IMAGE_FAILURE_INJECTION_TEST_SUPPORT_H_
+
+namespace livo::test
+{
+
+void failNextFrozenCameraImageStorageAllocation();
+
+}  // namespace livo::test
+
+#endif  // LIVO_TEST_FROZEN_CAMERA_IMAGE_FAILURE_INJECTION_TEST_SUPPORT_H_

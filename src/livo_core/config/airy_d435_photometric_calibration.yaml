@@ -1,0 +1,78 @@
+schema_version: 1
+calibration_set_id: airy-d435-outdoor9-11-unavailable
+dataset_scope:
+  - outdoor9
+  - outdoor10
+  - outdoor11
+status: unavailable
+blocking_reason: >-
+  The recorded bags contain rgb8 images but no exposure, gain, response-curve,
+  vignetting, or black/white-level metadata. Zero or unit placeholders are not
+  measurements and must not enable photometric residuals.
+
+frame_metadata:
+  exposure_sec:
+    provenance: unavailable
+    field: ""
+  sensor_gain:
+    provenance: unavailable
+    field: ""
+  timestamp_semantics: unknown
+
+cameras:
+  - camera_id: 0
+    name: front
+    status: unavailable
+    provenance: unavailable
+    source_id: ""
+    image_width: 640
+    image_height: 480
+    black_level: null
+    white_level: null
+    inverse_response_lut_file: ""
+    vignetting_transmission_file: ""
+    radiance_scale: null
+    radiance_offset: null
+    covariance_scale: null
+  - camera_id: 1
+    name: left
+    status: unavailable
+    provenance: unavailable
+    source_id: ""
+    image_width: 640
+    image_height: 480
+    black_level: null
+    white_level: null
+    inverse_response_lut_file: ""
+    vignetting_transmission_file: ""
+    radiance_scale: null
+    radiance_offset: null
+    covariance_scale: null
+  - camera_id: 2
+    name: back
+    status: unavailable
+    provenance: unavailable
+    source_id: ""
+    image_width: 640
+    image_height: 480
+    black_level: null
+    white_level: null
+    inverse_response_lut_file: ""
+    vignetting_transmission_file: ""
+    radiance_scale: null
+    radiance_offset: null
+    covariance_scale: null
+  - camera_id: 3
+    name: right
+    status: unavailable
+    provenance: unavailable
+    source_id: ""
+    image_width: 640
+    image_height: 480
+    black_level: null
+    white_level: null
+    inverse_response_lut_file: ""
+    vignetting_transmission_file: ""
+    radiance_scale: null
+    radiance_offset: null
+    covariance_scale: null
